@@ -1,0 +1,23 @@
+{
+  "name": "qna-dr",
+  "version": "1.0.0",
+  "description": "System Design Capstone",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Falco-SDC/QnA-dR.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Falco-SDC/QnA-dR/issues"
+  },
+  "homepage": "https://github.com/Falco-SDC/QnA-dR#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
