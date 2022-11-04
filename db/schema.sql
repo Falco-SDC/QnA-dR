@@ -4,33 +4,31 @@ CREATE DATABASE questions_answers;
 
 USE questions_answers;
 
-CREATE TABLE products(
-  product_id int NOT NULL,
-  PRIMARY KEY (product_id)
-);
-
-
-CREATE TABLE photos(
-   id INT NOT NULL,
-   answer_id INT,
-   url VARCHAR(100)
-   PRIMARY KEY(id)
-   FOREIGN KEY ()
+CREATE TABLE questions(
+  id BIGINT NOT NULL PRIMARY KEY,
+  product_id BIGINT NOT NULL ,
+  body VARCHAR(1000) NOT NULL,
+  date_written BIGINT,
+  asker_name VARCHAR(60),
+  asker_email VARCHAR(60),
+  reported int,
+  helpful int
 );
 
 CREATE TABLE answers(
-  id INT NOT NULL PRIMARY KEY,
-  body VARCHAR(60),
+  id BIGINT NOT NULL PRIMARY KEY,
+  question_id BIGint NOT NULL,
+  body VARCHAR(1000),
   date_written BIGINT,
   answerer_name VARCHAR(60),
-  asker_email VAR(60),
+  answerer_email VARCHAR(60),
   reported INT,
-  helpful INT,
-  FOREIGN KEY
+  helpful INT
 );
 
--- CREATE TABLE questions(
-
--- )
-
+CREATE TABLE photos(
+   id BIGINT NOT NULL PRIMARY KEY,
+   answer_id BIGINT NOT NULL,
+   url VARCHAR(200)
+);
 
