@@ -6,6 +6,8 @@
 -- IGNORE 1 LINES
 -- (id);
 
+-- this use of path was the only way that worked
+
 LOAD DATA LOCAL INFILE '/Users/admin/Desktop/sdcCapStone/qna-dr/csvData/questions.csv'
 INTO TABLE questions
 FIELDS TERMINATED BY ','
