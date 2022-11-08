@@ -11,6 +11,9 @@ const pool = mysql.createPool({
 
 SelectAllQuestions = () => {
   return new Promise((resolve, reject)=>{
+   // select all questions using product id
+
+
     pool.query('SELECT * FROM questions LIMIT 10', (error, questions) => {
       if(error) {
         return reject(error)
@@ -20,12 +23,13 @@ SelectAllQuestions = () => {
   })
 }
 
-SelectAllAnswers = () =>{
+SelectAllAnswers = (question_id, count, page) =>{
   return new Promise((resolve,reject) => {
-    pool.query('SELECT * FROM answers LIMIT 10', (error, answers)=>{
+    pool.query(`SELECT answers.id as answer_id, answers.body, answers.date_written, answers.answerer_name, answers.helpful, JSON_ARRAYAGG(JSON_OBJECT("id", photos.id,"url", photos.url)) photos FROM answers LEFT JOIN photos on photos.answer_id= answers.id WHERE answers.question_id=${question_id} GROUP BY answers.id LIMIT ${page}, ${count}`, (error, answers)=>{
       if(error) {
         return reject(error)
       }
+
       return resolve(answers)
     })
   })
@@ -89,6 +93,7 @@ UpdateAnswerHelpful = () =>{
     })
   })
 }
+
 
 UpdateAnswerReport = () =>{
   return new Promise((resolve, reject) => {

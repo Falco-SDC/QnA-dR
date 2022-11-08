@@ -16,17 +16,22 @@ const db = require('../db/driver.js')
     })
   }
 
-// how to handle if req does not have query params?
   const getAllAnswers = (req, res) => {
-    let page = req.query.page
-    let count = req.query.count
+    let page = req.query.page || 0;
+    let count = req.query.count || 5;
     let question_id = req.params.question_id
-    db.SelectAllAnswers(question_id)
+    let obj = {}
+    obj.question = question_id;
+    obj.page = page;
+    obj.count= count
+    db.SelectAllAnswers(question_id, count, page)
     .then((result)=>{
-      res.send(result)
+     obj.results = result
+      res.send(obj)
     })
     .catch((error)=>{
-      res.sendStatus(204).send('question not found')
+      console.log(error)
+      res.sendStatus(204)
     })
   }
 
