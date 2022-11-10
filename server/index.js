@@ -1,10 +1,10 @@
 require("dotenv").config();
 const express =require('express');
+const app = express();
 //  provides utilities for working with file and directory paths.
 const path = require("path");
 // import db
 const db = require("../db/driver.js");
-const app = express();
 // require controllers
 const controllers = require('./controllers.js')
 
@@ -12,10 +12,7 @@ const controllers = require('./controllers.js')
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
-
-
 // ROUTES
-
 // Retrieves a list of questions for a particular product
 app.get('/qa/questions', controllers.getAllQuestions);
 // Returns answers for a given question.
@@ -29,14 +26,12 @@ app.put('/qa/questions/:question_id/helpful', controllers.updateHelpfulQuestion)
 // Updates a question to show it was reported.
 app.put('/qa/questions/:question_id/report', controllers.updateReportQuestion)
 // Updates an answer to show it was found helpful.
-app.put('/qa/answers/:answer_id/report', controllers. updateHelpfulAnswer)
-
-
-
+app.put('/qa/answers/:answer_id/helpful', controllers.updateHelpfulAnswer)
+// Updates an answer to show it has been reported
+app.put('/qa/answers/:answer_id/report', controllers.updateReportAnswer)
 
 app.listen(process.env.PORT);
 console.log(`Listening at http://localhost:${process.env.PORT}`);
-
 
   // check if db is connected to server
 app.get("/getMysqlStatus", (req, res) => {
