@@ -1,18 +1,16 @@
 const db = require('../db/driver.js')
-
-// 1. cretae function that is invoked in router
-   // 2. invoke model function (promise)
-   //6. then respond to client
+const async =require('async');
 
   const getAllQuestions = (req, res) => {
-    // console.log(req.query)
     let product_id = req.query
+    console.log(product_id)
     db.SelectAllQuestions(product_id)
     .then((result) => {
       res.send(result)
     })
     .catch((error)=>{
-      res.sendStatus(204).send(error,'no question found')
+      console.log(error,'here')
+      res.sendStatus(204)
     })
   }
 
@@ -20,52 +18,56 @@ const db = require('../db/driver.js')
     let page = req.query.page || 0;
     let count = req.query.count || 5;
     let question_id = req.params.question_id
-    let obj = {}
-    obj.question = question_id;
-    obj.page = page;
-    obj.count= count
+    let responseObj = {}
+    responseObj.question = question_id;
+    responseObj.page = page;
+    responseObj.count= count
     db.SelectAllAnswers(question_id, count, page)
     .then((result)=>{
-     obj.results = result
-      res.send(obj)
+      responseObj.results = result
+      res.send(responseObj)
     })
     .catch((error)=>{
       console.log(error)
       res.sendStatus(204)
     })
   }
-
-// need to account for optional params
+  // how to insert date on query generate date
  const addAQuestion = (req, res) => {
-    let addQuestionBody = req.body.body
-    // console.log(req.body.body)
-    let addQuestionName = req.body.name
-    let addQuestionEmail = req.body.email
-    let addAQuestionProduct_id = req.body.product_id
-    db.AddAQuestionModel(addQuestionBody, addQuestionName,addQuestionEmail,addAQuestionProduct_id)
+  console.log(req.body)
+    let body = req.body.body
+    let asker_name = req.body.name
+    let asker_email = req.body.email
+    let product_id = req.body.product_id
+    let setUp = {body, asker_name, asker_email,product_id}
+    db.AddAQuestionModel(setUp)
     .then((result)=>{
-      res.sendStatus(201).send('CREATED')
+      res.send(201, result)
     })
     .catch((error)=>{
+      console.log(error)
       // set headers error 'ERR_HTTP_HEADERS_SENT' -- fix response with proper error message
       res.status(404)
     })
  }
 
+
  const addAnAnswer = (req, res) => {
   let question_id = req.params.question_id
-  let addAnswerBody = req.body.body
-  let addAnswerName = req.body.name
-  let addAnswerEmail = req.body.email
-  let addAnswerPhotos = req.body.photos
-  db.AddAnAnswerModal(question_id, addAnswerBody, addAnswerName, addAnswerEmail, addAnswerPhotos)
-  .then((result) => {
-    res.sendStatus(201).send('CREATED')
+  let body = req.body.body
+  let answerer_name = req.body.name
+  let answerer_email = req.body.email
+  let photos = req.body.photos[0] // pass entire array
+  let setUp = {question_id, body, answerer_name, answerer_email};
+  db.AddAnAnswerModal(setUp, photos)
+  .then((result)=>{
+   res.send(201, "CREATED")
   })
   .catch((error)=>{
-    res.status(500, 'nah')
+    console.log(error)
+
   })
- }
+}
 
  // Updates a question to show it was found helpful.
  const updateHelpfulQuestion = (req, res) => {
@@ -115,7 +117,8 @@ const db = require('../db/driver.js')
  })
 }
 
-
+// do i  need to check for duplicates?
+  // need to handle null returns to client
 
 module.exports = { getAllQuestions , getAllAnswers, addAQuestion, addAnAnswer,
   updateHelpfulQuestion, updateReportQuestion, updateHelpfulAnswer, updateReportAnswer

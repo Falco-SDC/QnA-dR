@@ -9,55 +9,118 @@ const pool = mysql.createPool({
   database: process.env.DB_NAME,
 });
 
-SelectAllQuestions = () => {
+SelectAllQuestions = (product_id) => {
+  console.log(product_id,'from model')
   return new Promise((resolve, reject)=>{
    // select all questions using product id
-
-
-    pool.query('SELECT * FROM questions LIMIT 10', (error, questions) => {
-      if(error) {
-        return reject(error)
-      }
-      return resolve(questions)
-    })
-  })
-}
+    pool.query(`SELECT questions.id as question_id ,
+     questions.body as question_body,
+      ( SELECT FROM_UNIXTIME(questions.date_written/1000)) as question_date,
+       questions.asker_name,
+        questions.helpful as question_helpfulness,
+         questions.reported,
+         (SELECT JSON_OBJECTAGG(
+            answers.id, JSON_OBJECT(
+              "id", answers.id,
+              "body", answers.body,
+              "date", (SELECT FROM_UNIXTIME(answers.date_written/1000)),
+              "answerer_name", answers.answerer_name,
+              "helpfulness", answers.helpful,
+              "photos", (SELECT JSON_ARRAYAGG(
+                         JSON_OBJECT("id", photos.id,
+                         "url",photos.url))
+                         FROM photos WHERE photos.answer_id=answers.id)
+                         )) FROM answers WHERE answers.question_id=questions.id) answers FROM questions WHERE questions.product_id=13 LIMIT 20`, (error, questions) => {
+                          if(error) {
+                            return reject(error)
+                          }
+                          return resolve(questions)
+                        })
+                      })
+                    }
 
 SelectAllAnswers = (question_id, count, page) =>{
   return new Promise((resolve,reject) => {
-    pool.query(`SELECT answers.id as answer_id, answers.body, answers.date_written, answers.answerer_name, answers.helpful, JSON_ARRAYAGG(JSON_OBJECT("id", photos.id,"url", photos.url)) photos FROM answers LEFT JOIN photos on photos.answer_id= answers.id WHERE answers.question_id=${question_id} GROUP BY answers.id LIMIT ${page}, ${count}`, (error, answers)=>{
-      if(error) {
-        return reject(error)
-      }
+    pool.query(`SELECT answers.id as answer_id,
+                answers.body,
+                 answers.date_written,
+                 answers.answerer_name,
+                answers.helpful,
+                JSON_ARRAYAGG(
+                  JSON_OBJECT("id", photos.id,"url", photos.url))
+                  photos FROM answers LEFT JOIN photos on photos.answer_id= answers.id
+                  WHERE answers.question_id=${question_id}
+                  GROUP BY answers.id LIMIT ${page}, ${count}`,
+                  (error, answers)=>{
+                    if(error) {
+                      return reject(error)
+                    }
+                    return resolve(answers)
+                  })
+                })
+              }
 
-      return resolve(answers)
-    })
-  })
-}
-
-// this query data does not need to return data from db ?
-AddAQuestionModel = () =>{
+// this query data does not need to return data from db
+AddAQuestionModel = (setUp) =>{
   return new Promise((resolve, reject) => {
-    pool.query('SELECT * FROM questions LIMIT 20', (error, answers) => {
-      if(error) {
-        return reject(error)
-      }
-      return resolve(answers)
+    pool.query( `INSERT INTO questions SET ?`, setUp
+                 , (error, answers) => {
+                  if(error) {
+                    return reject(error,'ERROR POSTING QUESTION')
+                  }
+                  return resolve(answers)
+                })
+              })
+            }
+
+// one function for posting answer
+  // chain query to next query
+
+  // Promise.all([
+  //   pool.query(`INSERT INTO answers SET ? `, setUp),
+  //   pool.query(`INSERT INTO photos (answer_id,url) VALUES (LAST_INSERT_ID(), SET ?)` , photos)
+  //  ])
+
+
+// this query promise does not need to return data
+AddAnAnswerModal = (setUp, photos)=> {
+  // let query1 =  pool.promise().query(`INSERT INTO answers SET ? `, setUp)
+
+  // let query2 =  pool.promise().query(`INSERT INTO photos (answer_id, url) VALUES(LAST_INSERT_ID(),'${photos}')` )
+  // let query2 = pool.promise().query(`SELECT LAST_INSERT_ID()`)
+  return pool.promise().query(`INSERT INTO answers SET ? `, setUp).then( ()=> {
+    pool.promise().query(`INSERT INTO photos (answer_id, url) VALUES(LAST_INSERT_ID(),'${photos}')` ).then(()=> {
+
     })
+    .catch((err) =>{
+      console.log(err)
+    })
+  })
+  .catch((err)=>{
+    console.log(err)
   })
 }
 
-// this query promise does not need to return data?
-AddAnAnswerModal = ()=> {
-  return new Promise((resolve, reject) =>{
-    pool.query('SELECT * FROM answers LIMIT 20', (error, answers) => {
-      if(error) {
-        return reject(error)
-      }
-      return resolve(answers)
-    })
-  })
-}
+// AddPhotosToAnswers = (photos) => {
+//   return new Promise((resolve,reject) => {
+//     pool.query(`INSERT INTO photos (answer_id,url) VALUES (LAST_INSERT_ID(), SET ?)` , photos, (error, asnwers) => {
+//       if(error) {
+//         return reject(error,'ERROR POSTING PHOTOS')
+//       }
+//       console.log(answers)
+//       return resolve('CREATED')
+//     })
+//   })
+// }
+
+
+
+
+
+
+
+
+
 
 // Updates a question to show it was found helpful.
 UpdateAnswerHelpful = () =>{

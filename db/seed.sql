@@ -6,6 +6,9 @@
 -- IGNORE 1 LINES
 -- (id);
 
+
+
+
 -- this use of path was the only way that worked
 
 LOAD DATA LOCAL INFILE '/Users/admin/Desktop/sdcCapStone/qna-dr/csvData/questions.csv'
@@ -30,3 +33,7 @@ ENCLOSED BY '"'
 LINES TERMINATED BY '\n'
 IGNORE 1 LINES
 (id, answer_id, url);
+
+
+-- change date type -- alter table
+-- alter column to date type  using **function
